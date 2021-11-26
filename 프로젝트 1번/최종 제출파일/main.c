@@ -186,7 +186,7 @@ void BFS(int Gindex, int v) { //Gindex가 1이면 첫번째 그래프를 뜻함. v는 시작 노
 }
 
 void FreeMemory() { //동적할당한 메모리 해제
-	for (int i = 0; i < GraphIndex; i++) {
+	for (int i = 0; i < GraphNum; i++) {
 		int temp = _msize(GraphList[i]) / sizeof(int);
 		//printf("%d\n", temp);
 		for (int j = 0; j < temp; j++) {
@@ -202,7 +202,7 @@ int main() {
 	int startVertex = 0; //0은 정점1을 뜻함.
 	countGraphNum("input.txt");
 	readMap("input.txt");
-	for (int i = 0; i < GraphIndex; i++) {
+	for (int i = 0; i < GraphNum; i++) {
 		printf("그래프 [%d]\n\n", (i + 1));
 		printf("---------------------------------\n\n");
 		//DFS 깊이 우선 탐색
