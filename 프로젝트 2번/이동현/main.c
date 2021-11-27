@@ -1,24 +1,127 @@
-#define _CRT_SECURE_NO_WARNINGS
+ï»¿#define _CRT_SECURE_NO_WARNINGS
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
 #define MAX 100
 #define INF 100000
 
-int** GraphList[20] = { NULL, };
+int GraphNum = 0;
+int*** GraphList;
 int GraphIndex = 0;
-int VertexNumList[20] = { 0, };
-
+int* VertexNumList;
 int* visited;
 int* distance;
 int** path;
+
+void countGraphNum(char fileloc[50]) { //ì „ì²´ ê·¸ë˜í”„ì˜ ê°œìˆ˜ë¥¼ í™•ì¸í•˜ëŠ” í•¨ìˆ˜
+	FILE* fp2 = fopen(fileloc, "r");
+	if (fp2 == NULL) {
+		printf("íŒŒì¼ ì½ê¸° ì‹¤íŒ¨(ê²½ë¡œë¥¼ í™•ì¸í•´ì£¼ì„¸ìš”:D)\n");
+	}
+	else {
+		char buffer[MAX] = { 0, };
+		int check = 0; //ì •ì ì˜ ê°œìˆ˜ë¥¼ ë‚˜íƒ€ë‚´ëŠ” ì¤„ê³¼ ì¸ì ‘ ë…¸ë“œ ì •ë³´ë¥¼ ë‚˜íƒ€ë‚´ëŠ” ì¤„ êµ¬ë¶„í•˜ëŠ” ê¸°ì¤€
+		while (fgets(buffer, sizeof(buffer), fp2)) {
+			//ì¸ì ‘ ë…¸ë“œ ì •ë³´ë¥¼ ë‚˜íƒ€ë‚´ëŠ” ì¤„ì„ ì½ì„ ë•Œ
+			if (check != 0) {
+				check--;
+				continue;
+			}
+			//ì •ì  ê°œìˆ˜ë¥¼ ë‚˜íƒ€ë‚´ëŠ” ì¤„ì„ ì½ì„ ë•Œ
+			int NumSize = sscanf(buffer, "%d", &check); //í•œ ê·¸ë˜í”„ì˜ ì „ì²´ ì •ì ì˜ ê°œìˆ˜
+			GraphNum += 1;
+		}
+		GraphList = (int***)malloc(sizeof(int) * GraphNum); //ê·¸ë˜í”„ë¥¼ ë‹´ì„ ë°°ì—´ì„ ë™ì í• ë‹¹í•¨. 
+		VertexNumList = (int*)calloc(GraphNum, sizeof(int));//ê° ê·¸ë˜í”„ì˜ ì •ì  ê°œìˆ˜ë¥¼ ë‹´ì„ ë°°ì—´ì„ ë™ì í• ë‹¹í•¨.
+		fclose(fp2);
+	}
+}
+
+void readMap2(char fileloc[50]) {
+	FILE* fp = fopen(fileloc, "r");
+	if (fp == NULL)
+		printf("íŒŒì¼ì´ ì¡´ì¬í•˜ì§€ ì•ŠìŠµë‹ˆë‹¤.\n");
+	else {
+		char buffer[MAX] = { 0, };
+		int check = 0;
+		int rowIndex = 0;
+		int colIndex = 0;
+		int num = 0; //ê°€ì¤‘ì¹˜ ê°’
+
+		while (fgets(buffer, sizeof(buffer), fp)) {
+			if (check != 0) {
+				check--;
+				char* bufferPtr = strtok(buffer, " ");// " " ê³µë°± ë¬¸ìë¥¼ ê¸°ì¤€ìœ¼ë¡œ ë¬¸ìì—´ì„ ìë¦„, í¬ì¸í„° ë°˜í™˜
+				bufferPtr = strtok(NULL, " ");
+				while (bufferPtr != NULL) {// ìë¥¸ ë¬¸ìì—´ì´ ë‚˜ì˜¤ì§€ ì•Šì„ ë•Œê¹Œì§€ ë°˜ë³µ
+					colIndex = atoi(bufferPtr) - 1;
+					bufferPtr = strtok(NULL, " ");
+					num = atoi(bufferPtr);
+					bufferPtr = strtok(NULL, " ");// ë‹¤ìŒ ë¬¸ìì—´ì„ ì˜ë¼ì„œ í¬ì¸í„°ë¥¼ ë°˜í™˜
+
+					//printf("Graph : %d, rowIndex : %d, colIndex : %d, num : %d\n", GraphIndex,rowIndex,colIndex, num);
+					GraphList[GraphIndex - 1][rowIndex][colIndex] = num;
+				}
+				rowIndex++;
+				colIndex = 0;
+				continue;
+			}
+
+			//ê·¸ë˜í”„ì˜ ë…¸ë“œ ê°œìˆ˜ ì¶œë ¥ì¤„.
+			int Numsize = sscanf(buffer, "%d", &check); //ê·¸ë˜í”„ ì •ì ì˜ ê°œìˆ˜
+			VertexNumList[GraphIndex] = check;
+			GraphList[GraphIndex] = (int**)malloc(sizeof(int*) * check);
+
+			for (int i = 0; i < check; i++) {
+				GraphList[GraphIndex][i] = (int*)malloc(sizeof(int) * check);
+			}
+
+			for (int i = 0; i < check; i++) {
+				for (int j = 0; j < check; j++)
+				{
+					if (i == j)
+						GraphList[GraphIndex][i][j] = 0;
+					else
+						GraphList[GraphIndex][i][j] = INF;
+				}
+			}
+			GraphIndex += 1;
+			rowIndex = 0;//rowIndex ì´ˆê¸°í™”
+		}
+		fclose(fp);
+	}//loop end
+}
+
 void makeArr(int GIndex) {
 	visited = (int*)calloc(VertexNumList[GIndex], sizeof(int));
 	distance = (int*)calloc(VertexNumList[GIndex], sizeof(int));
 	path = (int**)calloc(VertexNumList[GIndex], sizeof(int*));
+	if (path != NULL) {
 	for (int i = 0; i < VertexNumList[GIndex]; i++) {
-		path[i] = (int*)calloc(VertexNumList[GIndex],sizeof(int));
+		path[i] = (int*)calloc(VertexNumList[GIndex], sizeof(int));
 	}
+}
+}
+
+void freeArr2() {
+	for (int i = 0; i < GraphNum; i++) {
+		int temp = _msize(GraphList[i]) / sizeof(int);
+		for (int j = 0; j < temp; j++) {
+			free(GraphList[i][j]);
+		}
+		free(GraphList[i]);
+	}
+	free(GraphList);
+	free(VertexNumList);
+	free(visited);
+	free(distance);
+
+	int pathSize = _msize(path) / sizeof(int);
+	for (int i = 0; i < pathSize; i++) {
+		free(path[i]);
+	}
+	free(path);
+
 }
 
 void Dijkstra(int GIndex) {
@@ -30,7 +133,7 @@ void Dijkstra(int GIndex) {
 			path[i][1] = i + 1;
 	}
 	visited[0] = 1;
-	
+
 	for (int i = 0;i < VertexNumList[GIndex] - 1;i++) {
 		int u = 0; int minC = INF;
 		for (int j = 0; j < VertexNumList[GIndex];j++) {
@@ -55,10 +158,10 @@ void Dijkstra(int GIndex) {
 				}
 			}
 		}
-	}			
-	printf("½ÃÀÛÁ¡ : 1\n");
+	}
+	printf("ì‹œì‘ì  : 1\n");
 	for (int i = 1; i < VertexNumList[GIndex];i++) {
-		printf("Á¤Á¡ [%d]: ", i+1);
+		printf("ì •ì  [%d]: ", i + 1);
 		for (int j = 0; j < VertexNumList[GIndex];j++)
 		{
 			if (j == 0)
@@ -66,87 +169,22 @@ void Dijkstra(int GIndex) {
 			else if (path[i][j] != 0)
 				printf("- %d ", path[i][j]);
 		}
-		printf(", ±æÀÌ : %d\n", distance[i]);
+		printf(", ê¸¸ì´ : %d\n", distance[i]);
 	}
 }
+
 
 int main(void) {
-	//"input2.txt" txtÆÄÀÏ ÀĞ±â
-	FILE* fp = fopen("input2.txt", "r");
-	if (fp == NULL)
-		printf("ÆÄÀÏ ÀĞ±â ½ÇÆĞ\n");
-	else {
-		//ÇÑ ÁÙ¾¿ ÀĞ±â
-		char buffer[MAX] = { 0, }; 
-		int check = 0;
-		int rowIndex = 0;
-		int colIndex = 0;
-		int num = 0; //°¡ÁßÄ¡
-		while (fgets(buffer, sizeof(buffer), fp)) {
-			
-			//ÀÎÁ¢ ³ëµå Á¤º¸¸¦ ³ªÅ¸³»´Â ÁÙÀ» ÀĞÀ» ¶§
-			if (check != 0) {
-				check--;
+	//"input2.txt" txt ì½ì–´ì˜¤ê¸°
+	countGraphNum("input2.txt");
+	readMap2("input2.txt");
 
-				int bufferSize = strlen(buffer);
-				if (strlen(buffer) > 2) {
-					for (int i = 2;i < bufferSize;i++) {
-						if (i % 2 == 1) continue;
-						else if (i % 4 == 2) {
-							colIndex = (buffer[i] - '0') - 1;
-							num = (buffer[i+2] - '0');
-						}
-						GraphList[GraphIndex - 1][rowIndex][colIndex] = num;
-					}
-				}
-				rowIndex++;
-				colIndex = 0;
-			}
-			else {
-				check = buffer[0] - '0';
-				VertexNumList[GraphIndex] = check;
-				//Á¤Á¡ °³¼ö¸¸Å­ ±×·¡ÇÁ µ¿ÀûÇÒ´çÇØ¼­ »ı¼º
-				GraphList[GraphIndex] = (int**)malloc(sizeof(int*) * check);
-				for (int i = 0; i < check; i++) {
-					GraphList[GraphIndex][i] = (int*)malloc(sizeof(int) * check);
-				}
-
-				//2Â÷¿ø ¹è¿­ ÃÊ±âÈ­(i=j ÀÌ¸é 0À¸·Î ÃÊ±âÈ­, i!=jÀÌ¸é INF ·Î ÃÊ±âÈ­)
-				for (int i = 0; i < check;i++) {
-					for (int j = 0; j < check;j++)
-					{
-						if (i == j)
-							GraphList[GraphIndex][i][j] = 0;
-						else
-							GraphList[GraphIndex][i][j] = INF;
-					}
-				}
-				GraphIndex += 1;
-			}
-		}//loop end
-		fclose(fp);
+	for (int i = 0; i < GraphIndex;i++) {
+		printf("\nê·¸ë˜í”„ [%d]\n\n", (i + 1));
+		printf("--------------------------\n\n");
+		makeArr(i);
+		Dijkstra(i);
 	}
-
-	//¸¸µé¾îÁø ±×·¡ÇÁ Ãâ·Â
-	
-/*
-for (int k = 0; k < GraphIndex; k++) {
-			printf("%-10d   \n",VertexNumList[k]);
-			for (int a = 0; a < VertexNumList[k]; a++) {
-				for (int b = 0; b < VertexNumList[k]; b++) {
-					printf("%d ", GraphList[k][a][b]);
-				}
-				printf("\n");
-			}
-			printf("\n");
-		}
-*/
-for (int i = 0; i < GraphIndex;i++) {
-	printf("±×·¡ÇÁ [%d]\n\n", (i + 1));
-	printf("--------------------------\n\n");
-	makeArr(i);
-	Dijkstra(i);
-}
-
+	freeArr2();
 
 }
