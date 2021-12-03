@@ -162,14 +162,18 @@ void Dijkstra(int GIndex) {
 	printf("시작점 : 1\n");
 	for (int i = 1; i < VertexNumList[GIndex];i++) {
 		printf("정점 [%d]: ", i + 1);
-		for (int j = 0; j < VertexNumList[GIndex];j++)
-		{
-			if (j == 0)
-				printf("%d ", path[i][j]);
-			else if (path[i][j] != 0)
-				printf("- %d ", path[i][j]);
+		if (distance[i] != INF) {
+			for (int j = 0; j < VertexNumList[GIndex];j++)
+			{
+				if (j == 0)
+					printf("%d ", path[i][j]);
+				else if (path[i][j] != 0)
+					printf("- %d ", path[i][j]);
+			}
+			printf(", 길이 : %d\n", distance[i]);
 		}
-		printf(", 길이 : %d\n", distance[i]);
+		else
+			printf("경로 없음");
 	}
 }
 
