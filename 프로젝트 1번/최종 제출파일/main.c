@@ -132,6 +132,11 @@ void freeArr(int SearchCheck) {
 	}
 	int	pathSize = _msize(path) / sizeof(int);
 	for (int i = 0; i < pathSize; i++) {
+		if (path[i + 1] == 0) { //연결된 경로가 더 없는 경우 예외처리
+			printf("%d ", path[i]);
+			printf("\n\n");
+			break;
+		}
 		printf("%d ", path[i]);
 		if (i != (pathSize - 1)) {
 			printf("- ");
@@ -200,8 +205,8 @@ void FreeMemory() { //동적할당한 메모리 해제
 
 int main() {
 	int startVertex = 0; //0은 정점1을 뜻함.
-	countGraphNum("input.txt");
-	readMap("input.txt");
+	countGraphNum("input3.txt");
+	readMap("input3.txt");
 	for (int i = 0; i < GraphNum; i++) {
 		printf("그래프 [%d]\n\n", (i + 1));
 		printf("---------------------------------\n\n");
