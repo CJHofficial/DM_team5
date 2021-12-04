@@ -47,14 +47,15 @@ void freeArr(int SearchCheck) {
 	free(path);
 }
 
+//이 코드는 Mac OS에서 작성했습니다.
+
 void BFS(int Gindex, int v) { //Gindex가 1이면 첫번째 그래프를 뜻함. v는 시작 노드
-	if (path[malloc_size(path) / sizeof(int) - 1] != 0) return;//_msize. 모든 노드 방문을 원할 시, 이 구문 주석처리.
-	printf("V : %d \n", v);
+	if (path[malloc_size(path) / sizeof(int) - 1] != 0) return;//윈도우에서는 _msize. 모든 노드 방문을 원할 시, 이 구문 주석처리.
 
 	if (visited[v] == 0) {//연결노드 탐색 및 경로에 추가.
 		visited[v] = 1;
 		for (int i = 0; i < VertexNumList[Gindex]; i++) { //여기서 i는 v와 연결된 노드를 의미함.
-			if (GraphList[Gindex][v][i] != 0 && visited[i] == 0) {
+			if (GraphList[Gindex][v][i] != 0) {
 				int isIndexInPath = 0; // path에 값이 없는 경우 0/ 존재하는 경우 1.
 				for (int j = 0; j< VertexNumList[Gindex]; j++){ 
 					if(path[j] == i+1){//path에 이미 존재하는 경우
